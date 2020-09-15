@@ -7,6 +7,8 @@
 /**
  * Resourceful controller for interacting with barbers
  */
+
+ const Barber = use('App/Models/Barber');
 class BarberController {
   /**
    * Show a list of all barbers.
@@ -17,19 +19,9 @@ class BarberController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  async index ({ request, response, view }) {
-  }
-
-  /**
-   * Render a form to be used for creating a new barber.
-   * GET barbers/create
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
-   */
-  async create ({ request, response, view }) {
+  async index ({ }) {
+    const barbers = await Barber.all();
+    return barbers;
   }
 
   /**
@@ -40,7 +32,12 @@ class BarberController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async store ({ request, response }) {
+  async store ({ request }) {
+    const data = request.all();
+    const barber = await Barber.create(data)
+
+    return barber;
+
   }
 
   /**
@@ -52,19 +49,14 @@ class BarberController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  async show ({ params, request, response, view }) {
-  }
+  async show ({ params, response }) {
+    try{
+      const barber = await Barber.findOrFail(params.id)
 
-  /**
-   * Render a form to update an existing barber.
-   * GET barbers/:id/edit
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
-   */
-  async edit ({ params, request, response, view }) {
+      return barber
+    } catch (err) {
+      return response.status(404).send('ID não encontrado')
+    }
   }
 
   /**
@@ -76,6 +68,18 @@ class BarberController {
    * @param {Response} ctx.response
    */
   async update ({ params, request, response }) {
+
+    try{
+      const barber = await Barber.findOrFail(params.id)
+
+      barber.merge(request.all())
+
+      await barber.save()
+
+      return barber
+    } catch (err){
+        return response.status(404).send('ID não encontrado')
+    }
   }
 
   /**
@@ -87,6 +91,12 @@ class BarberController {
    * @param {Response} ctx.response
    */
   async destroy ({ params, request, response }) {
+    try{
+      const barber = await Barber.findOrFail(params.id)
+      barber.delete()
+    } catch(err){
+      return response.status(404).send('ID não encontrado')
+    }
   }
 }
 

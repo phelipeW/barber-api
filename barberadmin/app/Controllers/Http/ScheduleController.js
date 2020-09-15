@@ -7,6 +7,8 @@
 /**
  * Resourceful controller for interacting with schedules
  */
+
+ const Schedule = use('App/Models/Schedule')
 class ScheduleController {
   /**
    * Show a list of all schedules.
@@ -17,20 +19,16 @@ class ScheduleController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  async index ({ request, response, view }) {
+  async index () {
+    const schedule = await Schedule.query()
+      .with('user')
+      .with('barber')
+      .with('service')
+      .fetch()
+
+    return schedule
   }
 
-  /**
-   * Render a form to be used for creating a new schedule.
-   * GET schedules/create
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
-   */
-  async create ({ request, response, view }) {
-  }
 
   /**
    * Create/save a new schedule.
@@ -40,7 +38,12 @@ class ScheduleController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async store ({ request, response }) {
+  async store ({ request }) {
+    const data = request.all();
+
+    const schedule = await Schedule.create(data)
+
+    return schedule;
   }
 
   /**
@@ -52,19 +55,13 @@ class ScheduleController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  async show ({ params, request, response, view }) {
-  }
-
-  /**
-   * Render a form to update an existing schedule.
-   * GET schedules/:id/edit
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
-   */
-  async edit ({ params, request, response, view }) {
+  async show ({ params, response }) {
+    try{
+    const schedule = await Schedule.findOrFail(params.id)
+    return schedule
+    }catch(err){
+      return response.status(404).send('Erro ao encontrar agenda')
+    }
   }
 
   /**
@@ -76,6 +73,15 @@ class ScheduleController {
    * @param {Response} ctx.response
    */
   async update ({ params, request, response }) {
+    try{
+    const schedule = await Schedule.findOrFail(params.id)
+
+    schedule.merge(request.all())
+
+    await schedule.save()
+    } catch(err){
+      return response.status(404).send('Erro ao atualizar agenda')
+    }
   }
 
   /**
@@ -87,6 +93,12 @@ class ScheduleController {
    * @param {Response} ctx.response
    */
   async destroy ({ params, request, response }) {
+    try{
+      const schedule = await Schedule(params.id)
+      schedule.delete()
+    } catch(err){
+      return response.status(404).status('Erro ao excluir agenda')
+    }
   }
 }
 

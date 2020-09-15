@@ -7,6 +7,8 @@
 /**
  * Resourceful controller for interacting with services
  */
+
+ const Service = use('App/Models/Service')
 class ServiceController {
   /**
    * Show a list of all services.
@@ -17,19 +19,9 @@ class ServiceController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  async index ({ request, response, view }) {
-  }
-
-  /**
-   * Render a form to be used for creating a new service.
-   * GET services/create
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
-   */
-  async create ({ request, response, view }) {
+  async index () {
+    const services = await Service.all()
+    return services
   }
 
   /**
@@ -40,7 +32,11 @@ class ServiceController {
    * @param {Request} ctx.request
    * @param {Response} ctx.response
    */
-  async store ({ request, response }) {
+  async store ({ request }) {
+    const data = request.all();
+    const service = await Service.create(data)
+
+    return service
   }
 
   /**
@@ -52,19 +48,14 @@ class ServiceController {
    * @param {Response} ctx.response
    * @param {View} ctx.view
    */
-  async show ({ params, request, response, view }) {
-  }
+  async show ({ params, response }) {
+    try{
+      const service = await Service.findOrFail(params.id);
+      return service;
+    } catch(err){
+      return response.status(404).send('Erro ao encontrar serviço!')
+    }
 
-  /**
-   * Render a form to update an existing service.
-   * GET services/:id/edit
-   *
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @param {View} ctx.view
-   */
-  async edit ({ params, request, response, view }) {
   }
 
   /**
@@ -76,6 +67,17 @@ class ServiceController {
    * @param {Response} ctx.response
    */
   async update ({ params, request, response }) {
+    try{
+      const service = await Service.findOrFail(params.id)
+      service.merge(request.all())
+
+      await service.save()
+
+      return service
+    } catch(err){
+      return response.status(404).send('Erro ao atualizar serviço')
+    }
+
   }
 
   /**
@@ -87,6 +89,12 @@ class ServiceController {
    * @param {Response} ctx.response
    */
   async destroy ({ params, request, response }) {
+    try{
+      const service = await Service.findOrFail(params.id)
+      service.delete();
+    } catch(err){
+      return response.status(404).send('Erro ao excluir serviço')
+    }
   }
 }
 

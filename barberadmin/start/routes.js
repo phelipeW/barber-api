@@ -21,5 +21,8 @@ Route.post('/register', 'AuthController.register')
 Route.post('/login', 'AuthController.login')
 
 Route.group(() => {
-  Route.resource('products', 'ProductController').apiOnly()
+  Route.resource('product', 'ProductController').apiOnly()
+  Route.resource('barber', 'BarberController').apiOnly()
+  Route.resource('service', 'ServiceController').apiOnly()
+  Route.resource('schedule', 'ScheduleController').apiOnly()
 }).middleware('auth')
